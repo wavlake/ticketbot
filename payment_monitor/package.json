@@ -1,0 +1,47 @@
+{
+  "name": "payments_monitor",
+  "version": "1.0.0",
+  "description": "Payments monitor process for handling ticket purchases",
+  "main": "index.ts",
+  "scripts": {
+    "start": "node -r tsconfig-paths/register -r ts-node/register ./index.ts",
+    "dev": "NODE_ENV=dev DEBUG=express:router concurrently \"npx tsc --watch\" \"nodemon dist/index.js --watch\"",
+    "build": "npx tsc"
+  },
+  "author": "Michael Rhee",
+  "license": "",
+  "dependencies": {
+    "@grpc/proto-loader": "^0.6.5",
+    "dotenv": "^16.0.3",
+    "grpc": "^1.24.11",
+    "loglevel": "^1.8.0",
+    "nostr-tools": "^1.17.0",
+    "websocket-polyfill": "^0.0.3"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.22.15",
+    "@babel/preset-typescript": "^7.22.15",
+    "@types/express": "^4.17.17",
+    "@types/node": "^20.2.5",
+    "concurrently": "^8.1.0",
+    "jest": "^29.6.4",
+    "nodemon": "^2.0.22",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.3.3"
+  },
+  "nodemonConfig": {
+    "_comment": "config via https://stackoverflow.com/a/58226283",
+    "ignore": [
+      "**/*.test.ts",
+      "**/*.spec.ts",
+      ".git",
+      "node_modules"
+    ],
+    "watch": [
+      "src"
+    ],
+    "exec": "node -r tsconfig-paths/register -r ts-node/register ./index.ts",
+    "ext": "ts, js"
+  }
+}

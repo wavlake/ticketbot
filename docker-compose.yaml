@@ -1,0 +1,7 @@
+services:
+  ticketbot:
+    build: .
+    ports:
+      - "8080:8080"
+  payment_monitor:
+    build: ./payment_monitor
