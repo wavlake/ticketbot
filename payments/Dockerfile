@@ -14,9 +14,14 @@ RUN apt-get -y update && \
     curl \
     sudo
     
-# Copy repo source and build ticket service
+# Copy repo source and build parent modules
 COPY ./ /app/
 WORKDIR /app
+RUN npm install --unsafe-perm ||  ((if [ -f npm-debug.log ]; then cat npm-debug.log; fi) && false)
+RUN npx tsc
+
+# Build this service
+WORKDIR /app/payments
 RUN npm install --unsafe-perm ||  ((if [ -f npm-debug.log ]; then cat npm-debug.log; fi) && false)
 RUN npx tsc
 

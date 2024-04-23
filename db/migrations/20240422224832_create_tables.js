@@ -1,7 +1,7 @@
 exports.up = function (knex) {
   return knex.schema
     .createTable("event", function (table) {
-      table.integer("id").primary().unique();
+      table.increments("id").primary().unique();
       table.string("name", 255).notNullable();
       table.string("location", 255).notNullable();
       table.string("description", 255).notNullable();

@@ -1,9 +1,9 @@
 const log = require("loglevel");
 log.setLevel(process.env.LOGLEVEL || "debug");
-const dbConfig = require("../db/knexfile");
+const dbConfig = require("@db/knexfile");
 import knex from "knex";
 const db = knex(dbConfig[process.env.NODE_ENV ?? "development"]);
-const { lightning } = require("../lib/lnd");
+const { lightning } = require("@lib/lnd");
 const randomString = require("randomstring");
 
 const run = async () => {

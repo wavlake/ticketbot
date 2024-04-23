@@ -20,8 +20,12 @@ services:
         condition: service_completed_successfully
     networks:
       default:
+    volumes:
+      - ${TLS_PATH}:${TLS_PATH}
   ticketbot-payments:
-    build: ./payment_monitor
+    build:
+      context: ./
+      dockerfile: ./payments/Dockerfile
     environment:
       - LOGLEVEL=${LOGLEVEL}
       - DB_CLIENT=${DB_CLIENT}
@@ -39,6 +43,8 @@ services:
         condition: service_completed_successfully
     networks:
       default:
+    volumes:
+      - ${TLS_PATH}:${TLS_PATH}
   ticketbot-db:
     image: postgres
     container_name: ticketbot-db
@@ -58,6 +64,8 @@ services:
       timeout: 5s
       retries: 2
       start_period: 360s
+    ports:
+      - "5432:5432"
   ticketbot-migrate:
     image: node:18-alpine3.16
     container_name: ticketbot-migrate
@@ -79,5 +87,5 @@ services:
       ticketbot-db:
         condition: service_healthy
 networks:
-  default:
-    name: ticketbot
+  ticketbot:
+    driver: bridge
