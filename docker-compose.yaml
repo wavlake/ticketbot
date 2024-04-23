@@ -1,7 +1,83 @@
 services:
   ticketbot:
     build: .
+    environment:
+      - LOGLEVEL=${LOGLEVEL}
+      - DB_CLIENT=${DB_CLIENT}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_NAME=${DB_NAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - MACAROON=${MACAROON}
+      - TLS_PATH=${TLS_PATH}
+      - LND_PORT=${LND_PORT}
+      - LND_HOST=${LND_HOST}
     ports:
       - "8080:8080"
-  payment_monitor:
+    depends_on:
+      ticketbot-migrate:
+        condition: service_completed_successfully
+    networks:
+      default:
+  ticketbot-payments:
     build: ./payment_monitor
+    environment:
+      - LOGLEVEL=${LOGLEVEL}
+      - DB_CLIENT=${DB_CLIENT}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_NAME=${DB_NAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - MACAROON=${MACAROON}
+      - TLS_PATH=${TLS_PATH}
+      - LND_PORT=${LND_PORT}
+      - LND_HOST=${LND_HOST}
+    depends_on:
+      ticketbot-migrate:
+        condition: service_completed_successfully
+    networks:
+      default:
+  ticketbot-db:
+    image: postgres
+    container_name: ticketbot-db
+    environment:
+      POSTGRES_DB: ticketbot
+      POSTGRES_USER: ticketbot
+      POSTGRES_PASSWORD: ticketbot
+    volumes:
+      - ${PWD}/db/data:/var/lib/postgresql/data
+      - ${PWD}/db/db-logs:/var/log/postgresql
+    restart: always
+    networks:
+      default:
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ticketbot"]
+      interval: 5s
+      timeout: 5s
+      retries: 2
+      start_period: 360s
+  ticketbot-migrate:
+    image: node:18-alpine3.16
+    container_name: ticketbot-migrate
+    environment:
+      - LOGLEVEL=${LOGLEVEL}
+      - DB_CLIENT=${DB_CLIENT}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    entrypoint:
+      - sh
+      - -c
+      - "cd db && npm install --no-save --quiet knex@3.1.0 sqlite3@5.1.7 pg@8.11.5 dotenv@16.4.5 && npx knex migrate:latest"
+    volumes:
+      - ./db:/db
+    depends_on:
+      ticketbot-db:
+        condition: service_healthy
+networks:
+  default:
+    name: ticketbot

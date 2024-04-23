@@ -6,7 +6,7 @@
 .pnp.js
 
 # db
-*.sqlite3
+db/data
 
 # testing
 /coverage

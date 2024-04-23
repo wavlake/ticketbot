@@ -6,7 +6,7 @@ const router = express.Router();
 
 //////// ROUTES ////////
 
-router.get("/zap/:eventId/:quantity", createZap);
+router.get("/zap", createZap);
 
 // Export router
 export default router;
