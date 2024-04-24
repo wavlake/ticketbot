@@ -6,5 +6,6 @@ export interface Event {
   location: string;
   price_msat: number;
   image: string;
-  max_tickets: number;
+  total_tickets: number;
+  max_tickets_per_person: number;
 }

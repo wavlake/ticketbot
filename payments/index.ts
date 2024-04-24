@@ -5,10 +5,14 @@ import knex from "knex";
 const db = knex(dbConfig[process.env.NODE_ENV ?? "development"]);
 const { lightning } = require("@lib/lnd");
 const randomString = require("randomstring");
+import { Event } from "@db/types";
+const { getQuantity, createEncryptedMessage } = require("@lib/nostr");
+import { useWebSocketImplementation } from "nostr-tools";
+useWebSocketImplementation(require("ws"));
+import { Relay } from "nostr-tools";
 
 const run = async () => {
   log.debug("Running payment monitor...");
-
   const { settle_index } = await db("zap_request")
     .max("settle_index as settle_index")
     .first();
@@ -33,9 +37,9 @@ const run = async () => {
         return;
       }
 
-      const { eventId, buyerPubkey } = payment;
+      const { eventId, buyerPubkey, quantity } = payment;
       if (buyerPubkey && eventId) {
-        issueTicket(eventId, buyerPubkey);
+        issueTicket(eventId, buyerPubkey, quantity, paymentHash);
       }
     }
   });
@@ -65,23 +69,44 @@ const processPayment = async (paymentHash: string, settleIndex: number) => {
   }
 
   const { event_id, nostr } = zapRequest[0];
+  const buyerPubkey = JSON.parse(nostr).pubkey;
+  const quantity = getQuantity(JSON.parse(nostr));
 
-  return { eventId: event_id, buyerPubkey: JSON.parse(nostr).pubkey };
+  return { eventId: event_id, buyerPubkey: buyerPubkey, quantity: quantity };
 };
 
-const issueTicket = async (eventId: number, buyerPubkey: string) => {
+const issueTicket = async (
+  eventId: number,
+  buyerPubkey: string,
+  quantity: number,
+  paymentId: string
+) => {
   log.debug(`Issuing ticket for buyer: ${buyerPubkey} event: ${eventId}`);
+  const data = await db("event").where("id", eventId).first();
+  const event: Event = data;
 
   const ticketId = await generateTicketId();
   await db("event_ticket").insert({
     id: ticketId,
     event_id: eventId,
     npub: buyerPubkey,
+    quantity: quantity,
+    payment_id: paymentId,
     is_used: false,
     created_at: new Date(),
   });
 
   // Send DM to buyer
+  const relay = await Relay.connect(process.env.RELAY_URL);
+  log.debug(`Connected to ${relay.url}`);
+
+  const signedEvent = await createEncryptedMessage(
+    `${event.name} Ticket ID: ${ticketId}`,
+    buyerPubkey
+  );
+  await relay.publish(signedEvent);
+  relay.close();
+  return;
 };
 
 const generateTicketId = async () => {

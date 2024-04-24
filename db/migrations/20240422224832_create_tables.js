@@ -43,6 +43,7 @@ exports.up = function (knex) {
       table.string("payment_id", 255).unique();
       table.string("npub").notNullable();
       table.boolean("is_used").notNullable();
+      table.integer("quantity").notNullable();
       table.timestamp("created_at");
       table.timestamp("used_at").nullable();
 

@@ -6,6 +6,18 @@ From the project root run `docker compose up --build`
 
 You can drop the `build` flag if the containers have already been created.
 
+## Development
+
+The following applies to both the project root and `payments` directory:
+
+Install packages:
+`npm install`
+
+Run:
+`npm run dev`
+
+Note: Any `dist` and `node_modules` directory artifacts should be deleted before running `docker compose build` as they will interfere with the container build.
+
 ## Polar Setup
 
 In order for the containers to be able to reach an LND node in Polar, the `tls.cert` has to contain a reference to `host.docker.internal.` for the grpc client to be able to establish a secure connection.

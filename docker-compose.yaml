@@ -13,6 +13,8 @@ services:
       - TLS_PATH=${TLS_PATH}
       - LND_PORT=${LND_PORT}
       - LND_HOST=${LND_HOST}
+      - RELAY_URL=${RELAY_URL}
+      - SECRET_KEY=${SECRET_KEY}
     ports:
       - "8080:8080"
     depends_on:
@@ -38,6 +40,8 @@ services:
       - TLS_PATH=${TLS_PATH}
       - LND_PORT=${LND_PORT}
       - LND_HOST=${LND_HOST}
+      - RELAY_URL=${RELAY_URL}
+      - SECRET_KEY=${SECRET_KEY}
     depends_on:
       ticketbot-migrate:
         condition: service_completed_successfully
