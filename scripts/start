@@ -1,6 +1,6 @@
 #!/bin/bash
 PROJECT_ROOT="$(dirname $(readlink -f "${BASH_SOURCE[0]}"))/.."
-DOCKER_COMPOSE_FILE="${PROJECT_ROOT}/docker-compose.yml"
+DOCKER_COMPOSE_FILE="${PROJECT_ROOT}/docker-compose.yaml"
 CURRENT_DIR=$(pwd)
 
 if [[ ${CURRENT_DIR} =~ /scripts$ ]]; then
