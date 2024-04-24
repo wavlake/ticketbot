@@ -50,8 +50,8 @@ Restart=always
 RestartSec=5
 User=michael
 WorkingDirectory=/home/michael/ticketbot
-ExecStart=home/michael/ticketbot/scripts/start
-ExecStop=home/michael/ticketbot/scripts/stop
+ExecStart=/home/michael/ticketbot/scripts/start
+ExecStop=/home/michael/ticketbot/scripts/stop
 
 [Install]
 WantedBy=multi-user.target
