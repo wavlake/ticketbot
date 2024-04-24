@@ -69,11 +69,13 @@ exports.createZap = asyncHandler(async (req, res, next) => {
   }
 
   // Check tickets remaining
-  const { ticketsSold } = await db("event_ticket")
+  const ticketData = await db("event_ticket")
     .sum("quantity as ticketsSold")
     .where("event_id", eventId)
     .groupBy("event_id")
     .first();
+
+  const ticketsSold = ticketData ? ticketData.ticketsSold : 0;
 
   const ticketsRemaining =
     event.total_tickets - parseInt(ticketsSold as string);
@@ -85,12 +87,10 @@ exports.createZap = asyncHandler(async (req, res, next) => {
 
   const quantity = getQuantity(nostrEvent);
   if (quantity > ticketsRemaining) {
-    res
-      .status(400)
-      .send({
-        status: "ERROR",
-        reason: "Not enough tickets available, try a lower quantity",
-      });
+    res.status(400).send({
+      status: "ERROR",
+      reason: "Not enough tickets available, try a lower quantity",
+    });
     return;
   }
 
