@@ -101,7 +101,7 @@ const issueTicket = async (
   log.debug(`Connected to ${relay.url}`);
 
   const signedEvent = await createEncryptedMessage(
-    `${event.name} Ticket ID: ${ticketId}`,
+    `Thanks for purchasing a ticket to ${event.name}! Use this unique ticket code to get into the event: ${ticketId}`,
     buyerPubkey
   );
   await relay.publish(signedEvent);
