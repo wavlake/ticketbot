@@ -1,5 +1,8 @@
 import { getPublicKey } from "nostr-tools";
 import { hexToBytes } from "@noble/hashes/utils";
+import asyncHandler from "express-async-handler";
+const express = require("express");
+const router = express.Router();
 
 const SECRET_KEY_BYTES = hexToBytes(process.env.SECRET_KEY);
 const PUBLIC_KEY_HEX = getPublicKey(SECRET_KEY_BYTES);
@@ -16,7 +19,7 @@ const metadata = JSON.stringify([
   ["image/png;base64", WAVLAKE_BASE_64_PNG],
 ]);
 
-export const lnurlResponse = {
+const lnurlResponse = {
   callback: `${DOMAIN}`, // The URL from LN SERVICE which will accept the pay request parameters
   maxSendable: MAX_SENDABLE,
   minSendable: MIN_SENDABLE,
@@ -25,3 +28,11 @@ export const lnurlResponse = {
   allowsNostr: true,
   nostrPubkey: `${PUBLIC_KEY_HEX}`,
 };
+
+const getLnurl = asyncHandler(async (req, res, next) => {
+  res.status(200).send(lnurlResponse);
+});
+
+const route = router.get("/.well-known/lnurlp/rsvp", getLnurl);
+
+export default route;

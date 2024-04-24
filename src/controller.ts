@@ -6,7 +6,6 @@ import { Event as NostrEvent } from "nostr-tools/lib/types";
 import { verifyEvent } from "nostr-tools";
 import { createZapInvoice } from "../lib/invoice";
 import { getQuantity } from "../lib/nostr";
-import { lnurlResponse } from "../lib/lnurl";
 
 import { Event } from "../db/types";
 const db = knex(dbConfig[process.env.NODE_ENV || "development"]);
@@ -143,8 +142,4 @@ exports.createZap = asyncHandler(async (req, res, next) => {
   });
 
   res.status(200).send({ success: true, pr: invoiceResponse.paymentRequest });
-});
-
-exports.getLnurl = asyncHandler(async (req, res, next) => {
-  res.status(200).send(lnurlResponse);
 });

@@ -33,9 +33,11 @@ app.use(cors(corsOptions));
 
 // Import routes
 import routes from "./src/routes";
+import lnurl from "./lib/lnurl";
 
 // ROUTES
 app.use("/v1", routes);
+app.use("/", lnurl);
 
 // override default html error page with custom error handler
 const port = 8080;

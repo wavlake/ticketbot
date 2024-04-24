@@ -1,5 +1,5 @@
 const express = require("express");
-const { createZap, getLnurl } = require("./controller");
+const { createZap } = require("./controller");
 
 // Create router
 const router = express.Router();
@@ -7,7 +7,6 @@ const router = express.Router();
 //////// ROUTES ////////
 
 router.get("/zap", createZap);
-router.get("/.well-known/lnurlp/rsvp", getLnurl);
 
 // Export router
 export default router;
