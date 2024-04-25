@@ -24,6 +24,10 @@ services:
       default:
     volumes:
       - ${TLS_PATH}:${TLS_PATH}
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
   ticketbot-payments:
     build:
       context: ./
@@ -49,6 +53,10 @@ services:
       default:
     volumes:
       - ${TLS_PATH}:${TLS_PATH}
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
   ticketbot-db:
     image: postgres
     container_name: ticketbot-db
@@ -59,7 +67,9 @@ services:
     volumes:
       - ${PWD}/db/data:/var/lib/postgresql/data
       - ${PWD}/db/db-logs:/var/log/postgresql
-    restart: always
+    deploy:
+      restart_policy:
+        delay: 5s
     networks:
       default:
     healthcheck:
