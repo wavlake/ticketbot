@@ -1,16 +1,10 @@
+const log = require("loglevel");
 import { Event as NostrEvent, VerifiedEvent } from "nostr-tools/lib/types";
-import {
-  finalizeEvent,
-  generateSecretKey,
-  getPublicKey,
-  nip04,
-} from "nostr-tools";
-import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
+import { finalizeEvent, getPublicKey, nip04 } from "nostr-tools";
+import { hexToBytes } from "@noble/hashes/utils";
 
-const SECRET_KEY_HEX = process.env.SECRET_KEY;
 const SECRET_KEY_BYTES = hexToBytes(process.env.SECRET_KEY);
 const PUBLIC_KEY_HEX = getPublicKey(SECRET_KEY_BYTES);
-const PUBLIC_KEY_BYTES = hexToBytes(PUBLIC_KEY_HEX);
 
 export const getQuantity = (nostrEvent: NostrEvent): number => {
   const quantityTag = nostrEvent.tags.find((x) => x[0] === "quantity") || {};
@@ -22,6 +16,7 @@ export const getQuantity = (nostrEvent: NostrEvent): number => {
   }
   return quantity;
 };
+
 export const createEncryptedMessage = async (
   message: string,
   recipientPublicKey: string
@@ -33,14 +28,48 @@ export const createEncryptedMessage = async (
   );
 
   let event = {
-    pubkey: PUBLIC_KEY_HEX,
     created_at: Math.floor(Date.now() / 1000),
     kind: 4,
     tags: [["p", recipientPublicKey]],
     content: encryptedContent,
   };
 
-  // TODO: Issue zap receipt, but is it necessary?
+  return finalizeEvent(event, SECRET_KEY_BYTES);
+};
+
+export const createZapReceipt = async (
+  zapRequestEvent: string,
+  paymentRequest: string,
+  preimage: string,
+  settle_date: number
+) => {
+  let zapRequestEventObj;
+  try {
+    zapRequestEventObj = JSON.parse(zapRequestEvent);
+  } catch (e) {
+    log.error(`Error parsing zap request event: ${e}`);
+    return;
+  }
+
+  const aTag = zapRequestEventObj.tags.find((x) => x[0] === "a");
+
+  if (!aTag) {
+    log.error("No a tag found");
+    return;
+  }
+
+  let event = {
+    created_at: Math.floor(settle_date),
+    kind: 9735,
+    tags: [
+      ["p", PUBLIC_KEY_HEX],
+      ["bolt11", `${paymentRequest}`],
+      ["description", `${zapRequestEvent}`],
+      ["preimage", `${preimage}`],
+      aTag,
+    ],
+    content: "",
+  };
 
   return finalizeEvent(event, SECRET_KEY_BYTES);
 };

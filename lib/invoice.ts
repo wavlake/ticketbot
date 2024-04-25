@@ -87,6 +87,7 @@ export const createZapInvoice = async (
     value_msat: msatAmount, // Convert to msat
     expiry: INVOICE_EXPIRY_TIME,
     description_hash: descriptionHash,
+    private: true, // To support route hints
   };
 
   return new Promise((resolve, reject) => {

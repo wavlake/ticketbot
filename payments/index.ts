@@ -6,7 +6,11 @@ const db = knex(dbConfig[process.env.NODE_ENV ?? "development"]);
 const { lightning } = require("@lib/lnd");
 const randomString = require("randomstring");
 import { Event } from "@db/types";
-const { getQuantity, createEncryptedMessage } = require("@lib/nostr");
+const {
+  getQuantity,
+  createEncryptedMessage,
+  createZapReceipt,
+} = require("@lib/nostr");
 import { useWebSocketImplementation } from "nostr-tools";
 useWebSocketImplementation(require("ws"));
 import { Relay } from "nostr-tools";
@@ -29,10 +33,17 @@ const run = async () => {
     const { memo, r_hash, settled, settle_index } = response;
     if (settled && memo.startsWith("Ticket")) {
       log.debug(`Invoice for ticket settled`);
+      const { payment_request, settle_date } = response;
       const paymentHash = Buffer.from(response.r_hash).toString("hex");
-      log.debug(`Payment hash: ${paymentHash}`);
+      const preimage = Buffer.from(response.r_preimage).toString("hex");
 
-      const payment = await processPayment(paymentHash, settle_index);
+      const payment = await processPayment(
+        paymentHash,
+        settle_index,
+        payment_request as string,
+        preimage,
+        settle_date as number
+      );
       if (!payment) {
         return;
       }
@@ -52,7 +63,13 @@ const run = async () => {
   });
 };
 
-const processPayment = async (paymentHash: string, settleIndex: number) => {
+const processPayment = async (
+  paymentHash: string,
+  settleIndex: number,
+  paymentRequest: string,
+  preimage: string,
+  settle_date: number
+) => {
   log.debug(`Processing payment for ${paymentHash}`);
 
   const zapRequest = await db("zap_request")
@@ -71,8 +88,26 @@ const processPayment = async (paymentHash: string, settleIndex: number) => {
   const { event_id, nostr } = zapRequest[0];
   const buyerPubkey = JSON.parse(nostr).pubkey;
   const quantity = getQuantity(JSON.parse(nostr));
+  try {
+    log.debug("Publishing zap receipt");
+    const relay = await Relay.connect(process.env.RELAY_URL);
+    const receipt = await createZapReceipt(
+      nostr,
+      paymentRequest,
+      preimage,
+      settle_date
+    );
+    await relay.publish(receipt);
+    relay.close();
+  } catch (e) {
+    log.error(`Error issuing zap receipt: ${e}`);
+  }
 
-  return { eventId: event_id, buyerPubkey: buyerPubkey, quantity: quantity };
+  return {
+    eventId: event_id,
+    buyerPubkey: buyerPubkey,
+    quantity: quantity,
+  };
 };
 
 const issueTicket = async (
@@ -100,10 +135,17 @@ const issueTicket = async (
   const relay = await Relay.connect(process.env.RELAY_URL);
   log.debug(`Connected to ${relay.url}`);
 
-  const signedEvent = await createEncryptedMessage(
-    `Thanks for purchasing a ticket to ${event.name}! Use this unique ticket code to get into the event: ${ticketId}`,
-    buyerPubkey
-  );
+  const message = `
+    Thanks for purchasing a ticket to ${event.name}! 
+    Here's your unique ticket code to get into the event: ${ticketId}
+    | ${event.name} 
+    | ${event.dt_start} 
+    | ${event.location} 
+    | ${ticketId} 
+    | ${quantity}
+  `;
+
+  const signedEvent = await createEncryptedMessage(message, buyerPubkey);
   await relay.publish(signedEvent);
   relay.close();
   return;

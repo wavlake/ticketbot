@@ -117,7 +117,10 @@ exports.createZap = asyncHandler(async (req, res, next) => {
   if (userHasTicket) {
     res
       .status(400)
-      .send({ status: "ERROR", reason: "User already has ticket" });
+      .send({
+        status: "ERROR",
+        reason: "User has already purchased a ticket for this event.",
+      });
     return;
   }
 
