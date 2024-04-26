@@ -157,18 +157,22 @@ const issueTicket = async (
   log.debug(`Connected to ${relay.url}`);
 
   const message = `
-    Thanks for purchasing a ticket to ${event.name}! 
+    Thanks for purchasing a ticket to ${event.name}!
+
     Here's your unique ticket code to get into the event: ${ticketId}
     
     Details: ${prettifyDateString(event.date_start_str)}, ${prettifyTimeString(
     event.time_start_str
   )} at ${event.location}
+
+    Quantity: ${quantity}
+    
+    Enjoy the event!
     
     
     | ${event.name} | ${event.date_start_str} ${normalizeTimeString(
     event.time_start_str
-  )} | ${event.location}  | ${ticketId} | ${quantity} | ${event.id}
-  `;
+  )} | ${event.location}  | ${ticketId} | ${quantity} | ${event.id}`;
 
   const signedEvent = await createEncryptedMessage(message, buyerPubkey);
   await relay.publish(signedEvent);
