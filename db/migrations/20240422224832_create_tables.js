@@ -8,8 +8,13 @@ exports.up = function (knex) {
       table.integer("price_msat").notNullable();
       table.integer("total_tickets").notNullable();
       table.integer("max_tickets_per_person").notNullable();
-      table.timestamp("dt_start");
-      table.timestamp("dt_end");
+      table.string("date_start_str", 12);
+      table.string("date_end_str", 12);
+      table.string("time_start_str", 12);
+      table.string("time_end_str", 12);
+      table.timestamp("created_at").defaultTo(knex.fn.now());
+      table.timestamp("updated_at").defaultTo(knex.fn.now());
+      table.timestamp("expires_at");
     })
 
     .createTable("event_person", function (table) {

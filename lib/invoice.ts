@@ -8,68 +8,6 @@ const { lightning } = require("./lnd");
 
 const INVOICE_EXPIRY_TIME = 3600;
 
-// const getZapRequestEvent = async (rHashStr) => {
-//   return db
-//     .knex("zap_request")
-//     .where("payment_hash", "=", rHashStr)
-//     .first()
-//     .then((data) => {
-//       if (data) {
-//         return data.event;
-//       }
-//       return null;
-//     })
-//     .catch((err) => {
-//       log.error(
-//         `Error finding zap request event using rHashStr ${rHashStr}: ${err}`
-//       );
-//       return null;
-//     });
-// };
-
-// const publishZap = async (
-//   relay,
-//   serverSecret,
-//   serverPubkey,
-//   zapRequestEvent,
-//   paymentRequest,
-//   preimage,
-//   settledAt
-// ) => {
-//   await relay.connect();
-//   const eTag = zapRequestEvent.tags.find((x) => x[0] === "e");
-//   const aTag = zapRequestEvent.tags.find((x) => x[0] === "a");
-//   const pTag = zapRequestEvent.tags.find((x) => x[0] === "p");
-
-//   if (!aTag && !eTag) {
-//     log.error("No e or a tag found");
-//   }
-
-//   let event = {
-//     kind: 9735,
-//     pubkey: serverPubkey,
-//     created_at: parseInt(settledAt),
-//     tags: [
-//       ["bolt11", paymentRequest],
-//       ["description", JSON.stringify(zapRequestEvent)],
-//       ["preimage", preimage],
-//       ...(pTag ? [pTag] : []),
-//       ...(aTag ? [aTag] : []),
-//       ...(eTag ? [eTag] : []),
-//     ],
-//     content: "",
-//   };
-
-//   log.debug(event);
-//   event.id = getEventHash(event);
-//   event.sig = signEvent(event, serverSecret);
-
-//   // log.debug(event);
-
-//   await relay.publish(event);
-//   log.debug("Published event response");
-// };
-
 export const createZapInvoice = async (
   eventName: string,
   eventId: number,
@@ -83,7 +21,7 @@ export const createZapInvoice = async (
   log.debug(`Description hash: ${descriptionHash.toString("hex")}`);
 
   let request = {
-    memo: `Ticket: ${eventName} id:${eventId}`,
+    memo: `Ticket for ${eventName} id:${eventId}`,
     value_msat: msatAmount, // Convert to msat
     expiry: INVOICE_EXPIRY_TIME,
     description_hash: descriptionHash,

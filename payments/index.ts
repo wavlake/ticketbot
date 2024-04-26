@@ -15,6 +15,22 @@ import { useWebSocketImplementation } from "nostr-tools";
 useWebSocketImplementation(require("ws"));
 import { Relay } from "nostr-tools";
 
+const daysOfTheWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+const prettifyDateString = (x: string) => {
+  const date = new Date(x);
+  const day = daysOfTheWeek[date.getDay()];
+  const month = date.toLocaleString("default", { month: "short" });
+  const dayOfMonth = date.getDate();
+  const year = date.getFullYear();
+  return `${day}, ${month} ${dayOfMonth}, ${year}`;
+};
+
+const prettifyTimeString = (x: string) => {
+  // Remove leading 0 from string if it exists
+  const time = x.replace(/^0/, "");
+};
+
 const run = async () => {
   log.debug("Running payment monitor...");
   const { settle_index } = await db("zap_request")
@@ -138,11 +154,14 @@ const issueTicket = async (
   const message = `
     Thanks for purchasing a ticket to ${event.name}! 
     Here's your unique ticket code to get into the event: ${ticketId}
-    | ${event.name} 
-    | ${event.dt_start} 
-    | ${event.location} 
-    | ${ticketId} 
-    | ${quantity}
+    Date: ${event.date_start_str}, ${event.time_start_str}
+    
+    
+    | ${event.name} | ${prettifyDateString(
+    event.date_start_str
+  )} ${prettifyTimeString(event.time_start_str)} | ${
+    event.location
+  }  | ${ticketId} | ${quantity} | ${event.id}
   `;
 
   const signedEvent = await createEncryptedMessage(message, buyerPubkey);
