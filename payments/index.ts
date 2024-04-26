@@ -28,7 +28,12 @@ const prettifyDateString = (x: string) => {
 
 const prettifyTimeString = (x: string) => {
   // Remove leading 0 from string if it exists
-  const time = x.replace(/^0/, "");
+  return x.replace(/^0/, "");
+};
+
+const normalizeTimeString = (x: string) => {
+  // Remove trailing AM or PM from string if it exists
+  return x.replace(/(AM|PM)$/, "").trim();
 };
 
 const run = async () => {
@@ -154,14 +159,14 @@ const issueTicket = async (
   const message = `
     Thanks for purchasing a ticket to ${event.name}! 
     Here's your unique ticket code to get into the event: ${ticketId}
-    Date: ${event.date_start_str}, ${event.time_start_str}
+    Date: ${prettifyTimeString(event.date_start_str)}, ${prettifyTimeString(
+    event.time_start_str
+  )}
     
     
-    | ${event.name} | ${prettifyDateString(
-    event.date_start_str
-  )} ${prettifyTimeString(event.time_start_str)} | ${
-    event.location
-  }  | ${ticketId} | ${quantity} | ${event.id}
+    | ${event.name} | ${event.date_start_str} ${normalizeTimeString(
+    event.time_start_str
+  )} | ${event.location}  | ${ticketId} | ${quantity} | ${event.id}
   `;
 
   const signedEvent = await createEncryptedMessage(message, buyerPubkey);
