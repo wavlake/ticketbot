@@ -159,9 +159,10 @@ const issueTicket = async (
   const message = `
     Thanks for purchasing a ticket to ${event.name}! 
     Here's your unique ticket code to get into the event: ${ticketId}
-    Date: ${prettifyTimeString(event.date_start_str)}, ${prettifyTimeString(
+    
+    Details: ${prettifyDateString(event.date_start_str)}, ${prettifyTimeString(
     event.time_start_str
-  )}
+  )} at ${event.location}
     
     
     | ${event.name} | ${event.date_start_str} ${normalizeTimeString(
