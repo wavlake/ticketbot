@@ -1,8 +1,8 @@
 # Ticketbot
 
-This is POC ticketing agent built for Lightning and Nostr. The idea behind it is to allow an event organizer to sell tickets for an event using zaps as the payment mechanism and DM's for ticket delivery.
+This is a POC ticketing agent built for Lightning and Nostr. The idea behind it is to allow an event organizer to sell tickets for an event using zaps as the payment mechanism and DM's for ticket delivery.
 
-The event can be published as a standard note that contains all the metadata needed for any client to zap it and receive a ticket via DM. The note for the event is an extension of the [NIP-52](https://github.com/nostr-protocol/nips/blob/master/52.md) Calendar Event.
+The event can be published as a standard note that contains all the metadata needed for any client to zap it and receive a ticket via DM. The note for the event is an extension of the [NIP-52](https://github.com/nostr-protocol/nips/blob/master/52.md) Calendar Event. This note is to spec with the exception of an added `fee` tag to include the price of the ticket.
 
 This application does not handle the publishing of event notes. The only requirement is the `id` for the event in the local database must be set as the `d` tag in the note. That identifier is then sent as part of the coordinates in the `a` tag of the zap request, per [the spec](https://github.com/nostr-protocol/nips/blob/master/52.md).
 
