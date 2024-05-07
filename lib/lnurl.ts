@@ -33,6 +33,11 @@ const getLnurl = asyncHandler(async (req, res, next) => {
   res.status(200).send(lnurlResponse);
 });
 
-const route = router.get("/.well-known/lnurlp/rsvp", getLnurl);
+const getRedirect = asyncHandler(async (req, res, next) => {
+  res.redirect(302, "https://zine.wavlake.com/special-evening-nashville/");
+});
 
-export default route;
+router.get("/", getRedirect);
+router.get("/.well-known/lnurlp/rsvp", getLnurl);
+
+export default router;
